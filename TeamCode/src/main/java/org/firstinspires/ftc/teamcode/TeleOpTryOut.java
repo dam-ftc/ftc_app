@@ -21,8 +21,8 @@ public class TeleOpTryOut extends LinearOpMode
     private DcMotor motor4 = null;
     private DcMotor motor_misc1 = null;//motor pentru
     private DcMotor motor_misc2 = null;//motor pentru
-    private Servo arm1 = null;
-    private Servo arm2 = null;
+    private Servo arm1 = null;//brat prindere stang
+    private Servo arm2 = null;//brat prindere drept
 
     private double PMotSt, PMotDr;
     private boolean cb_grab = false;//Sunt cuburile apucate? (adevarat/fals)
@@ -53,7 +53,14 @@ public class TeleOpTryOut extends LinearOpMode
             motor_misc2.setPower(0);
     }
 
-    public void GrabCube()//Controlarea servo-urilor care prind cuburile
+
+/*
+    Controlarea servo-urilor care prind cuburile
+                PozBrat1    PozBrat2
+    Brat inchis:  120         160
+    Brat deschis: 60          210
+*/
+    public void GrabCube()
     {
         if(gamepad1.a == true)
             if(cb_grab == true)
