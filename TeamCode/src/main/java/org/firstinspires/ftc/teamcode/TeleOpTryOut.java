@@ -29,11 +29,32 @@ public class TeleOpTryOut extends LinearOpMode
 
     public void Move()//Miscarea robotului fata spate stanga dreapta, fiecare joystick controleaza 2 motoare
     {
-        motor1.setPower(gamepad1.left_stick_y);
+        if(gamepad1.right_stick_y > gamepad1.right_stick_x)
+        {
+            motor1.setPower(gamepad1.right_stick_y);
+            motor2.setPower(gamepad1.right_stick_y);
+
+            motor3.setPower(-gamepad1.right_stick_y);
+            motor4.setPower(-gamepad1.right_stick_y);
+        }
+        else
+        {
+            motor1.setPower(-gamepad1.right_stick_x);
+            motor2.setPower(-gamepad1.right_stick_x);
+
+            motor3.setPower(-gamepad1.right_stick_x);
+            motor4.setPower(-gamepad1.right_stick_x);
+        }
+/*        motor1.setPower(gamepad1.left_stick_y);
         motor2.setPower(gamepad1.left_stick_y);
 
         motor3.setPower(-gamepad1.right_stick_y);
-        motor4.setPower(-gamepad1.right_stick_y);
+        motor4.setPower(-gamepad1.right_stick_y); */
+    }
+
+    public void Strafe()
+    {
+
     }
 
     public void MotMisc()//Miscarea motoarelor pentru relicva si ridicarea cuburilor
@@ -57,8 +78,8 @@ public class TeleOpTryOut extends LinearOpMode
 /*
     Controlarea servo-urilor care prind cuburile
                 PozBrat1    PozBrat2
-    Brat inchis:  120         160
-    Brat deschis: 60          210
+    Brat inchis:  120(0.47)         160(0.62)
+    Brat deschis: 60()          210()
 */
     public void GrabCube()
     {
@@ -105,6 +126,7 @@ public class TeleOpTryOut extends LinearOpMode
         while(opModeIsActive())
         {
             Move();
+            /*Strafe();*/
             GrabCube();
             MotMisc();
         }
