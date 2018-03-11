@@ -11,124 +11,232 @@ import com.qualcomm.robotcore.hardware.Servo;
  */
 
 //@Disabled
-@TeleOp(name="Basic: Linear OpMode", group="Linear Opmode")
+@TeleOp(name="Basic: Andrei's Linear OpMode", group="Linear Opmode")
 
 public class TeleOpTryOut extends LinearOpMode
 {
-    private DcMotor motor1 = null;//motoare stanga
+    private DcMotor motor1 = null;//motoare stanga fata si spate
     private DcMotor motor2 = null;
-    private DcMotor motor3 = null;//motare dreapta
+    private DcMotor motor3 = null;//motare dreapta fata si spate
     private DcMotor motor4 = null;
-    private DcMotor motor_misc1 = null;//motor pentru
-    private DcMotor motor_misc2 = null;//motor pentru
-    private Servo arm1 = null;//brat prindere stang
-    private Servo arm2 = null;//brat prindere drept
+    private DcMotor motor_cub_rid = null;//motor pentru ridicare cuburi
+    private DcMotor motor_cub_flip = null;//motor pentru flip brate cuburi
+    private Servo armss = null;//brat prindere stanga sus
+    private Servo armsj = null;//brat prindere stanga jos
+    private Servo armds = null;//brat prindere dreapta sus
+    private Servo armdj = null;//brat prindere dreapta jos
 
-    private double PMotSt, PMotDr;
-    private boolean cb_grab = false;//Sunt cuburile apucate? (adevarat/fals)
+    private double viteza = 1;
+    private boolean apas_rid = false, rid_state = false, apas_flip = false, flip_state = false;// (adevarat/fals)
+    private boolean grabs = false, grabj = false, apas_lb = false;
 
-    public void Move()//Miscarea robotului fata spate stanga dreapta, fiecare joystick controleaza 2 motoare
+    public void MoveL()//Miscarea robotului fata spate stanga dreapta, fiecare joystick controleaza 2 motoare
     {
-        if(gamepad1.right_stick_y > gamepad1.right_stick_x)
+        if (gamepad1.left_stick_y > 0.5)
         {
-            motor1.setPower(gamepad1.right_stick_y);
-            motor2.setPower(gamepad1.right_stick_y);
+            motor1.setPower(viteza);
+            motor2.setPower(viteza);
 
-            motor3.setPower(-gamepad1.right_stick_y);
-            motor4.setPower(-gamepad1.right_stick_y);
+            motor3.setPower(-viteza);
+            motor4.setPower(-viteza);
         }
-        else
+        else if(gamepad1.left_stick_y < -0.5)
         {
-            motor1.setPower(-gamepad1.right_stick_x);
-            motor2.setPower(-gamepad1.right_stick_x);
+            motor1.setPower(-viteza);
+            motor2.setPower(-viteza);
 
-            motor3.setPower(-gamepad1.right_stick_x);
-            motor4.setPower(-gamepad1.right_stick_x);
+            motor3.setPower(viteza);
+            motor4.setPower(viteza);
         }
-/*        motor1.setPower(gamepad1.left_stick_y);
-        motor2.setPower(gamepad1.left_stick_y);
+        else if(gamepad1.left_stick_x > 0.5)
+        {
+            motor1.setPower(-viteza);
+            motor2.setPower(viteza);
 
-        motor3.setPower(-gamepad1.right_stick_y);
-        motor4.setPower(-gamepad1.right_stick_y); */
+            motor3.setPower(-viteza);
+            motor4.setPower(viteza);
+        }
+        else if(gamepad1.left_stick_x < -0.5)
+        {
+            motor1.setPower(viteza);
+            motor2.setPower(-viteza);
+
+            motor3.setPower(viteza);
+            motor4.setPower(-viteza);
+        }
+        else if(gamepad1.right_stick_x <= 0.4)
+        {
+            motor1.setPower(0);
+            motor2.setPower(0);
+            motor3.setPower(0);
+            motor4.setPower(0);
+        }
     }
 
-    public void Strafe()
+    public void MoveR()
     {
-
+        if(gamepad1.right_stick_x > 0.5)
+        {
+            motor1.setPower(viteza);
+            motor2.setPower(viteza);
+            motor3.setPower(viteza);
+            motor4.setPower(viteza);
+        }
+        else if(gamepad1.right_stick_x < -0.5)
+        {
+            motor1.setPower(-viteza);
+            motor2.setPower(-viteza);
+            motor3.setPower(-viteza);
+            motor4.setPower(-viteza);
+        }
     }
 
-    public void MotMisc()//Miscarea motoarelor pentru relicva si ridicarea cuburilor
+    public void MotCub()//Miscarea motoarelor pentru ridicarea si fliparea cuburilor
     {
-        if(gamepad1.dpad_up)
-            motor_misc1.setPower(0.5);
-        else if(gamepad1.dpad_down)
-            motor_misc1.setPower(-0.5);
-        else
-            motor_misc1.setPower(0);
-
-        if(gamepad1.dpad_left)
-             motor_misc2.setPower(0.5);
-        else if(gamepad1.dpad_right)
-            motor_misc2.setPower(-0.5);
-        else
-            motor_misc2.setPower(0);
-    }
-
-
-/*
-    Controlarea servo-urilor care prind cuburile
-                PozBrat1    PozBrat2
-    Brat inchis:  120(0.47)         160(0.62)
-    Brat deschis: 60()          210()
-*/
-    public void GrabCube()
-    {
-        if(gamepad1.a == true)
-            if(cb_grab == true)
+        //Lift
+        if(!gamepad1.a)
+            apas_rid = false;
+        if(gamepad1.a && !apas_rid)
+        {
+            apas_rid = true;
+            if(!rid_state)
             {
-                cb_grab = false;
-                arm1.setPosition(0.5);
-                arm2.setPosition(0.5);
+                rid_state = true;
+                motor_cub_rid.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                motor_cub_rid.setTargetPosition(10000);
+                motor_cub_rid.setPower(1);
             }
             else
             {
-                cb_grab = true;
-                arm1.setPosition(0.9);
-                arm2.setPosition(0.9);
+                rid_state = false;
+                motor_cub_rid.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                motor_cub_rid.setTargetPosition(0);
+                motor_cub_rid.setPower(-1);
             }
+        }
+
+        //Flip
+        if(!gamepad1.b)
+            apas_flip = false;
+        if(gamepad1.b && !apas_flip)
+        {
+            apas_flip = true;
+            if(motor_cub_rid.getCurrentPosition() > 2500)
+            {
+                if(!flip_state)
+                {
+                    flip_state = true;
+                    motor_cub_flip.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    motor_cub_flip.setTargetPosition(550);
+                    motor_cub_flip.setPower(0.5);
+                }
+                else
+                {
+                    flip_state = false;
+                    motor_cub_flip.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    motor_cub_flip.setTargetPosition(0);
+                    motor_cub_flip.setPower(0.5);
+                }
+            }
+        }
+    }
+
+    public  void Arms()//Miscarea servo-motoarelor care prind cuburile
+    {
+        if(!flip_state)
+        {
+            if(!gamepad1.left_bumper)
+                apas_lb = false;
+
+            if(gamepad1.left_bumper && !apas_lb)
+            {
+                apas_lb = true;
+                if(!grabj)
+                {
+                    grabj = true;
+                    armsj.setPosition(0);
+                    armdj.setPosition(1);
+                }
+                else
+                {
+                    grabj = false;
+                    armsj.setPosition(0.5);
+                    armdj.setPosition(0.5);
+                }
+            }
+        }
+        else
+        {
+            if(!gamepad1.left_bumper)
+                apas_lb = false;
+
+            if(gamepad1.left_bumper && !apas_lb)
+            {
+                apas_lb = true;
+                if(!grabs)
+                {
+                    grabs = true;
+                    armss.setPosition(1);
+                    armds.setPosition(0);
+                }
+                else
+                {
+                    grabs = false;
+                    armss.setPosition(0.5);
+                    armds.setPosition(0.5);
+                }
+            }
+        }
+    }
+
+//Controlarea servo-urilor care prind cuburile
+    public void Relicva()
+    {
+
     }
 
 /*
   Legenda controale:
-   Joystick stanga - Cele 2 motoare pentru rotile din stanga
-   Joystick dreapta - Cele 2 motoare pentru rotile din dreapta
+   Joystick stanga -  miscare fata/spate + strafe
+   Joystick dreapta - miscare rotatie
    DPad Sus si DPad Jos -
    DPad Stanga si DPad Dreapta -
+   Buton a - Ridicare/Coborare brat cub
 
    Main(). Aici se initializeaza fiecare componenta si se activeaza subprogramele necesare
 */
     @Override
     public void runOpMode() throws InterruptedException
     {
-         motor1 = hardwareMap.get(DcMotor.class, "motor1");
-         motor2 = hardwareMap.get(DcMotor.class, "motor2");
-         motor3 = hardwareMap.get(DcMotor.class, "motor3");
-         motor4 = hardwareMap.get(DcMotor.class, "motor4");
-        motor_misc1 = hardwareMap.get(DcMotor.class, "motor_misc1");
-        motor_misc2 = hardwareMap.get(DcMotor.class, "motor_misc2");
-         arm1 = hardwareMap.get(Servo.class, "arm1");
-         arm2 = hardwareMap.get(Servo.class, "arm2");
-
+        motor1 = hardwareMap.get(DcMotor.class, "motorleftfront");
+        motor2 = hardwareMap.get(DcMotor.class, "motorleftback");
+        motor3 = hardwareMap.get(DcMotor.class, "motorrightfront");
+        motor4 = hardwareMap.get(DcMotor.class, "motorrightback");
+        motor_cub_rid = hardwareMap.get(DcMotor.class, "motorridicare");
+        motor_cub_flip = hardwareMap.get(DcMotor.class, "motorflip");
+        armss = hardwareMap.get(Servo.class, "stangasus");
+        armds = hardwareMap.get(Servo.class, "dreaptasus");
+        armsj = hardwareMap.get(Servo.class, "stangajos");
+        armdj = hardwareMap.get(Servo.class, "dreaptajos");
         telemetry.addData("Status:", "Initialized");
+
+        armss.setPosition(0.5);
+        armsj.setPosition(0.5);
+        armds.setPosition(0.5);
+        armdj.setPosition(0.5);
+
+        motor_cub_flip.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motor_cub_rid.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         telemetry.update();
         waitForStart();
 
         while(opModeIsActive())
         {
-            Move();
-            /*Strafe();*/
-            GrabCube();
-            MotMisc();
+            MoveR();
+            MoveL();
+            MotCub();
+            Arms();
         }
         telemetry.addData("Status:" , "Terminated");
         telemetry.update();

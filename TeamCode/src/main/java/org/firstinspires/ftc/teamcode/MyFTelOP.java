@@ -16,7 +16,7 @@ by alex 24.11.2017
 
 
 @TeleOp(name="FTelOP", group="Pushbot")
-//@Disabled
+@Disabled
 public class MyFTelOP extends LinearOpMode {
 
     private DcMotor motorcub;
